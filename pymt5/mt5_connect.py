@@ -90,7 +90,9 @@ class MT5Connect(object):
         """
 
         if not isinstance(self.__socket, socket.socket):
-            self.logger.error("Connection is broken. Data can't be sent")
+            message = "Connection is broken. Data can't be sent"
+            self.logger.error(message)
+            raise MT5SocketError(message)
 
         self.number_command = \
             (self.number_command + 1) if self.number_command < self.MAX_CLIENT_COMMAND else 0
@@ -130,15 +132,19 @@ class MT5Connect(object):
         """
 
         if not isinstance(self.__socket, socket.socket):
-            self.logger.error("Connection is broken. Data can't be read")
+            message = "Connection is broken. Data can't be read"
+            self.logger.error(message)
+            raise MT5SocketError(message)
 
         while True:
 
             try:
                 header = self.__read_header()
             except socket.error as e:
+                message = "Data can't be read"
                 self.logger.error(str(e))
-                return None
+                self.logger.error(message)
+                raise MT5SocketError(message)
 
             if not isinstance(header, MT5HeaderProtocol):
                 self.logger.error("Incorrect header")
@@ -147,8 +153,10 @@ class MT5Connect(object):
             try:
                 body = self.__read_body(header.body_size)
             except socket.error as e:
+                message = "Data can't be read"
                 self.logger.error(str(e))
-                return None
+                self.logger.error(message)
+                raise MT5SocketError(message)
 
             if not isinstance(body, MT5BodyProtocol):
                 self.logger.error("Incorrect body")
