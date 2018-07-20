@@ -12,6 +12,8 @@ class MT5Ticks(object):
     PARAM_SYMBOL = 'SYMBOL'
     PARAM_TRANS_ID = 'TRANS_ID'
 
+    tick_last_trans_id = 0
+
     connect = None
 
     def __init__(self, connect, log_level='ERROR'):
@@ -23,18 +25,17 @@ class MT5Ticks(object):
         self.logger = MT5Logger(self.__class__.__name__, level=log_level)
         self.connect = connect
 
-    def tick_last(self, symbol, trans_id):
+    def tick_last(self, symbol):
         """
-        Get symbol by name
-        :param trans_id:
-        :type trans_id: int
+        Get tick last
         :param symbol:
         :type symbol: str
         :return:
         """
+
         if not self.connect.send(self.CMD_TICK_LAST, {
             self.PARAM_SYMBOL: symbol,
-            self.PARAM_TRANS_ID: trans_id
+            self.PARAM_TRANS_ID: self.tick_last_trans_id
         }):
             self.logger.error("Get tick last failed")
             return False
@@ -50,6 +51,9 @@ class MT5Ticks(object):
                 or body.options[MT5ReturnCodes.PARAM] != MT5ReturnCodes.STATUS_DONE:
             self.logger.error("Get tick last failed")
             return False
+
+        if self.PARAM_TRANS_ID in body.options:
+            self.tick_last_trans_id = body.options[self.PARAM_TRANS_ID]
 
         return json.loads(body.data)
 
