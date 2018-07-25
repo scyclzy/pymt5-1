@@ -12,8 +12,9 @@ class MT5Logger(object):
         'ERROR': logging.ERROR
     }
 
-    __name = None
-    __logger = None
+    name = None
+    logger = None
+    loggers = {}
 
     def __init__(self, name='', level='DEBUG'):
         """
@@ -22,13 +23,29 @@ class MT5Logger(object):
         :type name: str
         """
 
-        self.__name = name
-        self.__logger = logging.getLogger(self.__name)
-        self.__logger.setLevel(self.levels[level])
+        self.name = name
+
+        if name in self.__class__.loggers:
+            self.logger = self.__class__.loggers[name]
+        else:
+            self.logger = logging.getLogger(name)
+            self.logger.addHandler(self.get_handler())
+            self.__class__.loggers[name] = self.logger
+
+        self.logger.setLevel(self.levels[level])
+
+    @staticmethod
+    def get_handler():
+        """
+        Get stream handler
+        :return:
+        :rtype: StreamHandler
+        """
         stream_handler = StreamHandler(stream=sys.stderr)
         formatter = logging.Formatter('%(asctime)s [%(name)s/%(levelname)s]: %(message)s')
         stream_handler.setFormatter(formatter)
-        self.__logger.addHandler(stream_handler)
+
+        return stream_handler
 
     def debug(self, message):
         """
@@ -37,7 +54,7 @@ class MT5Logger(object):
         :type message: str
         :return:
         """
-        self.__logger.debug(message)
+        self.logger.debug(message)
 
     def info(self, message):
         """
@@ -46,7 +63,7 @@ class MT5Logger(object):
         :type message: str
         :return:
         """
-        self.__logger.info(message)
+        self.logger.info(message)
 
     def warning(self, message):
         """
@@ -55,7 +72,7 @@ class MT5Logger(object):
         :type message: str
         :return:
         """
-        self.__logger.warning(message)
+        self.logger.warning(message)
 
     def error(self, message):
         """
@@ -64,4 +81,4 @@ class MT5Logger(object):
         :type message: str
         :return:
         """
-        self.__logger.error(message)
+        self.logger.error(message)
