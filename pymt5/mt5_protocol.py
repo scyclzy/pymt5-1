@@ -3,7 +3,7 @@ import re
 from .mt5_utils import MT5Utils
 
 
-VERSION = 1755
+VERSION = 1881
 
 
 class MT5HeaderProtocol(object):
