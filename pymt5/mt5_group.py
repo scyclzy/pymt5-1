@@ -1,11 +1,10 @@
 import json
 
-from .mt5_logger import MT5Logger
-from .mt5_connect import MT5Connect
+from .mt5_request import MT5Request
 from .mt5_protocol import MT5ReturnCodes
 
 
-class MT5Group(object):
+class MT5Group(MT5Request):
 
     CMD_GROUP_GET = 'GROUP_GET'
     CMD_GROUP_ADD = 'GROUP_ADD'
@@ -14,17 +13,6 @@ class MT5Group(object):
     CMD_GROUP_NEXT = 'GROUP_NEXT'
 
     PARAM_GROUP = 'GROUP'
-
-    connect = None
-
-    def __init__(self, connect, log_level='ERROR'):
-        """
-        Init group module
-        :param connect:
-        :type connect: MT5Connect
-        """
-        self.logger = MT5Logger(self.__class__.__name__, level=log_level)
-        self.connect = connect
 
     def get(self, group):
         """

@@ -1,11 +1,10 @@
 import json
 
-from .mt5_logger import MT5Logger
-from .mt5_connect import MT5Connect
+from .mt5_request import MT5Request
 from .mt5_protocol import MT5ReturnCodes
 
 
-class MT5Symbols(object):
+class MT5Symbols(MT5Request):
 
     CMD_SYMBOL_GET = 'SYMBOL_GET'
     CMD_SYMBOL_GET_GROUP = 'SYMBOL_GET_GROUP'
@@ -17,17 +16,6 @@ class MT5Symbols(object):
     PARAM_GROUP = 'GROUP'
     PARAM_INDEX = 'INDEX'
     PARAM_TOTAL = 'TOTAL'
-
-    connect = None
-
-    def __init__(self, connect, log_level='ERROR'):
-        """
-        Init symbols module
-        :param connect:
-        :type connect: MT5Connect
-        """
-        self.logger = MT5Logger(self.__class__.__name__, level=log_level)
-        self.connect = connect
 
     def get(self, symbol):
         """

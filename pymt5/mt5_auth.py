@@ -1,13 +1,13 @@
 from hashlib import md5
 
-from .mt5_logger import MT5Logger
+from .mt5_request import MT5Request
 from .mt5_connect import MT5Connect
 from .mt5_protocol import VERSION, MT5ReturnCodes
 from .mt5_crypt import MT5Crypt
 from .mt5_utils import MT5Utils
 
 
-class MT5Auth(object):
+class MT5Auth(MT5Request):
 
     CMD_AUTH_START = 'AUTH_START'
     CMD_AUTH_ANSWER = 'AUTH_ANSWER'
@@ -37,9 +37,7 @@ class MT5Auth(object):
         :param agent:
         :type agent: str
         """
-        self.logger = MT5Logger(self.__class__.__name__, level=log_level)
-
-        self.connect = connect
+        super().__init__(connect, log_level)
         self.agent = agent
 
     def auth(self, login, password):
