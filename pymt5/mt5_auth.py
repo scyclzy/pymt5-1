@@ -70,7 +70,7 @@ class MT5Auth(MT5Request):
 
         srv_rand_answ = md5(
             bytes.fromhex(pass_hash) +
-            bytes.fromhex(response.get_int(self.PARAM_SRV_RAND))).hexdigest()
+            bytes.fromhex(response.get(self.PARAM_SRV_RAND))).hexdigest()
 
         response = self.send(self.CMD_AUTH_ANSWER, {
                 self.PARAM_SRV_RAND_ANSWER: srv_rand_answ,
