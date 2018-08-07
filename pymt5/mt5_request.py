@@ -1,4 +1,7 @@
-from pymt5 import MT5Logger, MT5ReturnCodes, MT5RequestError, MT5Response
+from .mt5_exceptions import MT5RequestError
+from .mt5_logger import MT5Logger
+from .mt5_protocol import MT5ReturnCodes
+from .mt5_response import MT5Response
 
 
 class MT5Request(object):

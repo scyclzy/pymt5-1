@@ -1,6 +1,9 @@
 from hashlib import md5
 
-from pymt5 import MT5Request, MT5Connect, VERSION, MT5Crypt, MT5Utils
+from .mt5_crypt import MT5Crypt
+from .mt5_protocol import VERSION
+from .mt5_request import MT5Request
+from .mt5_utils import MT5Utils
 
 
 class MT5Auth(MT5Request):

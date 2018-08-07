@@ -1,6 +1,7 @@
 import json
 
-from pymt5 import MT5Logger, MT5ResponseError
+from .mt5_exceptions import MT5ResponseError
+from .mt5_logger import MT5Logger
 
 
 class MT5Response(object):
