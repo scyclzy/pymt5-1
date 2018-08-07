@@ -1,9 +1,7 @@
 
 import socket
 
-from .mt5_logger import MT5Logger
-from .mt5_protocol import MT5HeaderProtocol, MT5BodyProtocol
-from .mt5_exceptions import MT5ConnectionError, MT5SocketError
+from pymt5 import MT5Logger, MT5HeaderProtocol, MT5BodyProtocol, MT5ConnectionError, MT5SocketError
 
 
 class MT5Connect(object):

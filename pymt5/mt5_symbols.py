@@ -1,7 +1,6 @@
 import json
 
-from .mt5_request import MT5Request
-from .mt5_protocol import MT5ReturnCodes
+from pymt5 import MT5Request
 
 
 class MT5Symbols(MT5Request):
@@ -23,25 +22,11 @@ class MT5Symbols(MT5Request):
         :param symbol:
         :return:
         """
-        if not self.connect.send(self.CMD_SYMBOL_GET, {
+        response = self.send(self.CMD_SYMBOL_GET, {
             self.PARAM_SYMBOL: symbol
-        }):
-            self.logger.error("Get symbol failed")
-            return False
+        })
 
-        try:
-            header, body = self.connect.read()
-        except TypeError:
-            self.logger.error("Read symbol data failed")
-            return False
-
-        if MT5ReturnCodes.PARAM not in body.options \
-                or body.data is None \
-                or body.options[MT5ReturnCodes.PARAM] != MT5ReturnCodes.STATUS_DONE:
-            self.logger.error("Get symbol failed")
-            return False
-
-        return json.loads(body.data)
+        return response.data
 
     def get_group(self, symbol, group):
         """
@@ -50,26 +35,12 @@ class MT5Symbols(MT5Request):
         :param group:
         :return:
         """
-        if not self.connect.send(self.CMD_SYMBOL_GET_GROUP, {
+        response = self.send(self.CMD_SYMBOL_GET_GROUP, {
             self.PARAM_SYMBOL: symbol,
             self.PARAM_GROUP: group
-        }):
-            self.logger.error("Get symbol failed")
-            return False
+        })
 
-        try:
-            header, body = self.connect.read()
-        except TypeError:
-            self.logger.error("Read symbol data failed")
-            return False
-
-        if MT5ReturnCodes.PARAM not in body.options \
-                or body.data is None \
-                or body.options[MT5ReturnCodes.PARAM] != MT5ReturnCodes.STATUS_DONE:
-            self.logger.error("Get symbol failed")
-            return False
-
-        return json.loads(body.data)
+        return response.data
 
     def get_next(self, index=0):
         """
@@ -79,25 +50,11 @@ class MT5Symbols(MT5Request):
         :return:
         """
 
-        if not self.connect.send(self.CMD_SYMBOL_NEXT, {
+        response = self.send(self.CMD_SYMBOL_NEXT, {
             self.PARAM_INDEX: index
-        }):
-            self.logger.error("Get symbol failed")
-            return False
+        })
 
-        try:
-            header, body = self.connect.read()
-        except TypeError:
-            self.logger.error("Read symbol data failed")
-            return False
-
-        if MT5ReturnCodes.PARAM not in body.options \
-                or body.data is None \
-                or body.options[MT5ReturnCodes.PARAM] != MT5ReturnCodes.STATUS_DONE:
-            self.logger.error("Get symbol failed")
-            return False
-
-        return json.loads(body.data)
+        return response.data
 
     def add(self, data):
         """
@@ -106,23 +63,8 @@ class MT5Symbols(MT5Request):
         :return:
         """
 
-        if not self.connect.send(self.CMD_SYMBOL_ADD, {}, json.dumps(data)):
-            self.logger.error("Add symbol failed")
-            return False
-
-        try:
-            header, body = self.connect.read()
-        except TypeError:
-            self.logger.error("Add data failed")
-            return False
-
-        if MT5ReturnCodes.PARAM not in body.options \
-                or body.data is None \
-                or body.options[MT5ReturnCodes.PARAM] != MT5ReturnCodes.STATUS_DONE:
-            self.logger.error("Add symbol failed")
-            return False
-
-        return json.loads(body.data)
+        response = self.send(self.CMD_SYMBOL_ADD, {}, json.dumps(data))
+        return response.data
 
     def get_total(self):
         """
@@ -130,23 +72,8 @@ class MT5Symbols(MT5Request):
         :return:
         """
 
-        if not self.connect.send(self.CMD_SYMBOL_TOTAL, {}):
-            self.logger.error("Get total symbols failed")
-            return False
-
-        try:
-            header, body = self.connect.read()
-        except TypeError:
-            self.logger.error("Read symbol data failed")
-            return False
-
-        if MT5ReturnCodes.PARAM not in body.options \
-                or self.PARAM_TOTAL not in body.options \
-                or body.options[MT5ReturnCodes.PARAM] != MT5ReturnCodes.STATUS_DONE:
-            self.logger.error("Get total symbols failed")
-            return False
-
-        return int(body.options[self.PARAM_TOTAL])
+        response = self.send(self.CMD_SYMBOL_TOTAL, {})
+        return response.get_int(self.PARAM_TOTAL)
 
     def get_all(self):
         """
@@ -158,17 +85,8 @@ class MT5Symbols(MT5Request):
 
         count = self.get_total()
 
-        if count is False:
-            self.logger.error("Get all symbols failed")
-            return False
-
         for index in range(0, count):
             symbol = self.get_next(index)
-
-            if symbol is False:
-                self.logger.error("Get all symbols failed")
-                return False
-
             result.append(symbol)
 
         return result

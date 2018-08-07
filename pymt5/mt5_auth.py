@@ -1,10 +1,6 @@
 from hashlib import md5
 
-from .mt5_request import MT5Request
-from .mt5_connect import MT5Connect
-from .mt5_protocol import VERSION, MT5ReturnCodes
-from .mt5_crypt import MT5Crypt
-from .mt5_utils import MT5Utils
+from pymt5 import MT5Request, MT5Connect, VERSION, MT5Crypt, MT5Utils
 
 
 class MT5Auth(MT5Request):
@@ -54,31 +50,13 @@ class MT5Auth(MT5Request):
         """
         Auth start
         """
-        if not self.connect.send(self.CMD_AUTH_START, {
-            self.PARAM_VERSION: VERSION,
-            self.PARAM_AGENT: self.agent,
-            self.PARAM_LOGIN: login,
-            self.PARAM_TYPE: 'MANAGER',
-            self.PARAM_CRYPT_METHOD:
-                self.VAL_CRYPT_AES256OFB if self.connect.is_crypt else self.VAL_CRYPT_NONE
-        }):
-            self.logger.error("Send auth data failed")
-            return False
-
-        try:
-            header, body = self.connect.read()
-        except TypeError:
-            self.logger.error("Read auth data failed")
-            return False
-
-        """
-        Check status auth start command
-        """
-        if MT5ReturnCodes.PARAM not in body.options \
-                or self.PARAM_SRV_RAND not in body.options \
-                or body.options[MT5ReturnCodes.PARAM] != MT5ReturnCodes.STATUS_DONE:
-            self.logger.error("Auth failed")
-            return False
+        response = self.send(self.CMD_AUTH_START, {
+                self.PARAM_VERSION: VERSION,
+                self.PARAM_AGENT: self.agent,
+                self.PARAM_LOGIN: login,
+                self.PARAM_TYPE: 'MANAGER',
+                self.PARAM_CRYPT_METHOD: self.VAL_CRYPT_AES256OFB if self.connect.is_crypt else self.VAL_CRYPT_NONE
+            })
 
         """
         Auth answer
@@ -89,40 +67,26 @@ class MT5Auth(MT5Request):
 
         srv_rand_answ = md5(
             bytes.fromhex(pass_hash) +
-            bytes.fromhex(body.options[self.PARAM_SRV_RAND])).hexdigest()
+            bytes.fromhex(response.get_int(self.PARAM_SRV_RAND))).hexdigest()
 
-        if not self.connect.send(self.CMD_AUTH_ANSWER, {
-            self.PARAM_SRV_RAND_ANSWER: srv_rand_answ,
-            self.PARAM_CLI_RAND: cli_rand
-        }):
-            self.logger.error("Send auth data failed")
-            return False
-
-        try:
-            header, body = self.connect.read()
-        except TypeError:
-            self.logger.error("Read auth data failed")
-            return False
+        response = self.send(self.CMD_AUTH_ANSWER, {
+                self.PARAM_SRV_RAND_ANSWER: srv_rand_answ,
+                self.PARAM_CLI_RAND: cli_rand
+            })
 
         """
         Check auth user answer
         """
-        if MT5ReturnCodes.PARAM not in body.options \
-                or self.PARAM_CLI_RAND_ANSWER not in body.options \
-                or body.options[MT5ReturnCodes.PARAM] != MT5ReturnCodes.STATUS_DONE:
-            self.logger.error("Auth failed")
-            return False
 
         cli_rand_answ = md5(
             bytes.fromhex(pass_hash) +
             bytes.fromhex(cli_rand)).hexdigest()
 
-        if body.options[self.PARAM_CLI_RAND_ANSWER] != cli_rand_answ:
+        if response.get(self.PARAM_CLI_RAND_ANSWER) != cli_rand_answ:
             self.logger.error("Server return broken password hash")
             return False
 
-        if self.PARAM_CRYPT_RAND in body.options and body.options[self.PARAM_CRYPT_RAND]:
-            self.connect.crypt = MT5Crypt(body.options[self.PARAM_CRYPT_RAND], pass_hash)
+        self.connect.crypt = MT5Crypt(response.get(self.PARAM_CRYPT_RAND), pass_hash)
 
         return True
 
