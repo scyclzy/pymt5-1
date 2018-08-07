@@ -20,7 +20,7 @@ else:
 
 setup(
     name='pymt5',
-    version='0.1.1',
+    version='0.1.2',
     packages=['pymt5'],
     ext_modules=ext_modules,
     cmdclass=cmdclass,
